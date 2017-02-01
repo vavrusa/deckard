@@ -9,6 +9,11 @@ option('PERMISSIVE',  true)
 option('NO_THROTTLE', true)
 trust_anchors.add('{{TRUST_ANCHOR}}')
 
+-- Trace all queries
+{% if FEATURES.qtrace is defined %}
+policy.add(policy.all(policy.QTRACE))
+{% endif %}
+
 {% if FEATURES.dns64_prefix is defined %}
 modules.load( 'dns64')
 dns64.config('{{FEATURES.dns64_prefix}}')
