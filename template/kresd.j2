@@ -3,8 +3,8 @@ modules = {'stats', 'policy', 'hints'}
 cache.size = 2*MB
 hints.root({['k.root-servers.net'] = '{{ROOT_ADDR}}'})
 option('NO_MINIMIZE', {{NO_MINIMIZE}})
--- Run tests in permissive mode
-option('PERMISSIVE',  true)
+-- If you wish, you can run tests in permissive mode:
+-- option('PERMISSIVE',  true)
 -- Always retry failing resolver
 option('NO_THROTTLE', true)
 {% for TA in TRUST_ANCHORS %}
