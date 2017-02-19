@@ -1,0 +1,69 @@
+	stub-addr: 192.0.2.10
+CONFIG_END
+
+SCENARIO_BEGIN Simple knotd query.
+
+; RFC 6672 section 2.2: RCODE=YXDOMAIN if result of substitution is too long
+STEP 229001 QUERY
+ENTRY_BEGIN
+REPLY DO
+SECTION QUESTION
+x.long.example.com.	IN A
+ENTRY_END
+
+; query returning maximal permissible length - should work
+STEP 229002 CHECK_ANSWER
+ENTRY_BEGIN
+MATCH rcode question answer
+SECTION QUESTION
+x.long.example.com.	IN A
+SECTION ANSWER
+long.example.com.	3600	IN	DNAME	64o-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.64o-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.64o-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.48o-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.example.com.
+x.long.example.com.	3600	IN	CNAME	x.64o-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.64o-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.64o-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.48o-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.example.com.
+x.64o-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.64o-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.64o-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.48o-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.example.com. 3600	IN	A	192.0.2.1
+ENTRY_END
+
+; test too long names in substitution
+STEP 229003 QUERY
+ENTRY_BEGIN
+REPLY DO
+SECTION QUESTION
+too.long.example.com.	IN A
+ENTRY_END
+
+; result of substitution is too long, expecting YXDOMAIN and the DNAME
+STEP 229004 CHECK_ANSWER
+ENTRY_BEGIN
+MATCH rcode question answer
+REPLY YXDOMAIN
+SECTION QUESTION
+too.long.example.com.	IN A
+SECTION ANSWER
+long.example.com.	3600	IN	DNAME	64o-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.64o-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.64o-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.48o-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.example.com.
+ENTRY_END
+
+
+;; RFC 6672 section 2.4:
+;;  Resource records MUST NOT exist at any subdomain of the owner of a
+;;  DNAME RR. [...]
+;;  If the server does
+;;  load the zone, those names below the DNAME RR will be occluded as
+;;  described in RFC 2136 [RFC2136], Section 7.18.
+;;
+;; knotd cd55110659e72a8664bb186a87cdb904dc909c01 does not such zone (ignoring semantic-checks: off)
+;
+;STEP 240001 QUERY
+;ENTRY_BEGIN
+;REPLY DO
+;SECTION QUESTION
+;occluded.dname.example.com.	IN A
+;ENTRY_END
+;
+;STEP 240002 CHECK_ANSWER
+;ENTRY_BEGIN
+;MATCH rcode question answer
+;REPLY QR NXDOMAIN
+;SECTION QUESTION
+;occluded.dname.example.com.	IN A
+;SECTION ANSWER
+;ENTRY_END
