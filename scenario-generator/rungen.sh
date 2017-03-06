@@ -21,11 +21,13 @@ NODE_FIREFOX=$(docker run -d --link $HUB_NAME:hub selenium/node-firefox:${VERSIO
 echo 'Waiting for nodes to register and come online...'
 sleep 2
 
+DIR="$(pwd)"
+
 function test_node {
   BROWSER=$1
   echo Running $BROWSER test...
   # Start monitoring here
-  docker run -v $DIR/test:/test -it --link $HUB_NAME:hub -e browser="$BROWSER" deckard/lookup:local
+  docker run -v "$DIR/test:/test" -w /test -it --link $HUB_NAME:hub -e browser="$BROWSER" deckard/lookup:local /test/test.sh
   STATUS=$?
   TEST_CONTAINER=$(docker ps -aq | head -1)
 
