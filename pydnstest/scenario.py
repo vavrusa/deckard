@@ -332,7 +332,7 @@ class Entry:
                     prefix = int(net[1])
                 if len(net) > 2:
                     scope = int(net[2])
-                addr = addr[0: (prefix + 7) / 8]
+                addr = addr[0: int((prefix + 7) / 8)]
                 if prefix % 8 != 0:  # Mask the last byte
                     addr = addr[:-1] + chr(ord(addr[-1]) & 0xFF << (8 - prefix % 8))
                 opts.append(dns.edns.GenericOption(8, struct.pack(
