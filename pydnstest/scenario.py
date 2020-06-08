@@ -320,7 +320,7 @@ class Entry:
         for v in fields:
             k, v = tuple(v.split('=')) if '=' in v else (v, True)
             if k.lower() == 'nsid':
-                opts.append(dns.edns.GenericOption(dns.edns.NSID, '' if v is True else v))
+                opts.append(dns.edns.GenericOption(dns.edns.NSID, bytearray() if v is True else v.encode('ascii')))
             if k.lower() == 'subnet':
                 net = v.split('/')
                 family = socket.AF_INET6 if ':' in net[0] else socket.AF_INET
