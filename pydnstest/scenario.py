@@ -48,7 +48,8 @@ def create_rr(owner, args, ttl=3600, rdclass='IN', origin='.'):
     if len(args) > 0:
         if (rr.rdtype == dns.rdatatype.DS):
             # convert textual algorithm identifier to number
-            args[1] = str(dns.dnssec.algorithm_from_text(args[1]))
+            # and convert returned int or IntEnum to string
+            args[1] = str(int(dns.dnssec.algorithm_from_text(args[1])))
         rd = dns.rdata.from_text(rr.rdclass, rr.rdtype, ' '.join(
             args), origin=dns.name.from_text(origin), relativize=False)
         rr.add(rd)
